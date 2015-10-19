@@ -16,6 +16,8 @@ The server is default to `http://localhost:8081`
 
 Commit changes
 
+    $ git add build
+
     $ git commit -m 'your commit message'
 
 Publish on gh-pages
