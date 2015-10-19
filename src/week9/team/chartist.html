@@ -1,5 +1,5 @@
 <html>
-<head>    
+<head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.1/css/materialize.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chartist/0.9.4/chartist.min.css">
 <head>
@@ -92,22 +92,6 @@ function solution5(){
     new Chartist.Bar('#q5 .answer', data);
 }
 
-function solution6(){
-    return 'TODO'
-}
-
-function solution7(){
-    return 'TODO'
-}
-
-function solution8(){
-    return 'TODO'
-}
-
-function solution9(){
-    return 'TODO'
-}
-
 function run(id, solutionFunc, data){
     console.log('run solution for ' + id)
     var answer = solutionFunc(data)
@@ -127,10 +111,6 @@ function loadDataThenRunSolutions(){
          run('#q3', solution3, items)
          run('#q4', solution4, items)
          run('#q5', solution5, items)
-        //  run('#q6', solution6, items)
-        //  run('#q7', solution7, items)
-        //  run('#q8', solution8, items)
-        //  run('#q9', solution9, items)
      })
      .fail(function(err){
          console.error(err)

@@ -54,11 +54,16 @@
     </section>
 
     <section id="q8" class="question">
-        <h4>In Phoenix, which McDonald's is the most northern and which is the most southern?</h4>
+        <h4>In Phoenix, how many coffee shops are within 2km of this most-reviewed Starbucks?</h4>
         <div class="answer"></div>
     </section>
 
     <section id="q9" class="question">
+        <h4>In Phoenix, which McDonald's is the furthest north, and which is the furthest south?</h4>
+        <div class="answer"></div>
+    </section>
+
+    <section id="q10" class="question">
         <h4>In Phoenix, which McDonald's has no Starbucks located within 5 kms?</h4>
         <div class="answer"></div>
     </section>
@@ -112,6 +117,10 @@ function solution9(){
     return 'TODO'
 }
 
+function solution10(){
+    return 'TODO'
+}
+
 function run(id, solutionFunc, data){
     console.log('run solution for ' + id)
     var answer = solutionFunc(data)
@@ -138,6 +147,7 @@ function loadDataThenRunSolutions(){
          run('#q7', solution7, items)
          run('#q8', solution8, items)
          run('#q9', solution9, items)
+         run('#q10', solution10, items)
      })
      .fail(function(err){
          console.error(err)
