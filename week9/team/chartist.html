@@ -46,12 +46,30 @@
 
 var items   // global scope (i.e., can be accessed in javascript console)
 
-function solution1(){
+function solution1(items){
     // TODO: replace the hard coded values in series by actual computation
-    var data = {
+
+    /*var data = {
           labels: ['HIST', 'HONR', 'HUMN', 'IAFS', 'IPHY'],
           series: [
             [121,23,42,56,12]
+          ]
+    }*/
+    var groups=_.groupBy(items, function(item){
+      return item['CrsPBADept']
+    })
+    var groupMap=_.mapValues(groups, function(g){
+      return g.length
+    })
+    var depts=['HIST', 'HONR', 'HUMN', 'IAFS', 'IPHY']
+    var num=_.map(depts, function(d){
+      return groupMap[d]
+    })
+    console.log("num: ",num)
+    var data = {
+          labels: depts,
+          series: [
+            num
           ]
     }
     new Chartist.Bar('#q1 .answer', data);
@@ -74,19 +92,91 @@ function solution2(){
 }
 
 
-function solution3(){
-}
-
-function solution4(){
-}
-
-function solution5(){
-    // TODO: replace the hard coded values in series by actual computation
+function solution3(items){
+  var groups=_.groupBy(items, function(item){
+      return item['CrsPBADept']
+    })
+    var groupMap=_.mapValues(groups, function(g){
+      return g.length
+    })
+    var depts=_.keys(groupMap)
+    var mapDepts=_.map(depts, function(d){
+      return {
+        "dept": d,
+        "number": groupMap[d]
+      }
+    })
+    var filterDepts=_.filter(mapDepts, function(d){
+      return d["number"] >= 100
+    })
+    console.log("filter: ", filterDepts)
     var data = {
-          labels: ['1xxx', '2xxx', '3xxx', '4xxx'],
+          labels: _.pluck(filterDepts, "dept"),
           series: [
-            [20,30,40,50],  // CSCI
-            [30,30,30,30]   // HIST
+            _.pluck(filterDepts, "number")
+          ]
+    }
+    new Chartist.Bar('#q3 .answer', data);
+}
+
+function solution4(items){
+  var groups=_.groupBy(items, function(item){
+      return item['CrsPBADept']
+    })
+    var groupMap=_.mapValues(groups, function(g){
+      return g.length
+    })
+    var depts=_.keys(groupMap)
+    var mapDepts=_.map(depts, function(d){
+      return {
+        "dept": d,
+        "number": groupMap[d]
+      }
+    })
+    var sortDepts=_.sortBy(mapDepts, function(d){
+      return d["number"]
+    }).reverse()
+    var topTen=_.take(sortDepts, 10)
+    var data = {
+          labels: _.pluck(topTen, "dept"),
+          series: [
+            _.pluck(topTen, "number")
+          ]
+    }
+    new Chartist.Bar('#q4 .answer', data);
+}
+
+function solution5(items){
+
+    var filterItems=_.filter(items, function(i){
+      return i['CrsPBADept'] === 'HIST' || i['CrsPBADept'] === 'CSCI'
+    })
+    var groups=_.groupBy(filterItems, function(c){
+      return c['CrsLvlNum']
+    })
+    var groupsMap=_.mapValues(groups, function(c){
+      return _.groupBy(c, function(course){
+        return course['CrsPBADept']
+      })
+    })
+    var groupsNum=_.mapValues(groupsMap, function(c){
+      return _.mapValues(c, function(course){
+        return course.length
+      })
+    })
+    console.log("num: ", groupsNum)
+    var keys=_.keys(groupsNum)
+    var csNum=_.map(keys, function(e){
+      return groupsNum[e]['CSCI']
+    })
+    var hiNum=_.map(keys, function(e){
+      return groupsNum[e]['HIST']
+    })
+    var data = {
+          labels: keys,
+          series: [
+            _.values(csNum),  // CSCI
+            _.values(hiNum)   // HIST
           ]
     }
     new Chartist.Bar('#q5 .answer', data);
