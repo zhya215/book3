@@ -12,7 +12,7 @@
 
 <div class="container">
 
-    <h1>Where should we build X?</h1>
+    <h1>Where should we build a 24-hours gym?</h1>
 
     <section id="candidates" class="question">
         <h4>Where are the candidate locations?</h4>
@@ -36,14 +36,16 @@
 // Candidate Locations
 //
 
-function getCandidateLocations(){
+function getCandidateLocations(m, n){
   var locations = []
-  locations.push({latitude: 33.45, longitude: -112.03})
-  locations.push({latitude: 33.45, longitude: -112.04})
-  locations.push({latitude: 33.45, longitude: -112.05})
-  locations.push({latitude: 33.45, longitude: -112.06})
-  locations.push({latitude: 33.45, longitude: -112.07})
-  locations.push({latitude: 33.45, longitude: -112.08})
+  var lat=33.45;
+  var lon=-112.03;
+  for(i=0; i < m; i++){
+    for(j=0; j < n; j++){
+      locations.push({latitude: 33.45+i*0.01, longitude: -112.03-j*0.01})
+    }
+    
+  }
   return locations
 }
 
@@ -52,29 +54,58 @@ function getCandidateLocations(){
 // Scoring Functions
 //
 
-function has_some_feature_1(loc){
+function Does_the_location_without_any_gyms_nearby_in_2000_km(loc){
   // TODO
-  return true
+  
+  var nearBy=_.filter(nearbyBusinesses, function(b){
+    //console.log("latitude: ", b["location"].latitude)
+    return b["location"].latitude == loc.latitude && b["location"].longitude == loc.longitude
+  })[0]
+  console.log("near by: ", nearBy)
+  return _.filter(nearBy["nearBy"], function(b){
+    return _.includes(b["categories"].join(','), "Gyms")
+  }).length == 0
 }
 
-function has_some_feature_2(loc){
-  // TODO
-  return false
+function Does_the_location_with_any_McDonalds_nearby_in_2000_km(loc){
+  var nearBy=_.filter(nearbyBusinesses, function(b){
+    //console.log("latitude: ", b["location"].latitude)
+    return b["location"].latitude == loc.latitude && b["location"].longitude == loc.longitude
+  })[0]
+  return _.filter(nearBy["nearBy"], function(b){
+    return _.includes(b["name"], "McDonalds")
+  }).length > 0
 }
 
-function has_some_feature_3(loc){
-  // TODO
-  return true
+function Does_the_location_with_more_than_1_hospital_nearby_in_2000_km(loc){
+  var nearBy=_.filter(nearbyBusinesses, function(b){
+    //console.log("latitude: ", b["location"].latitude)
+    return b["location"].latitude == loc.latitude && b["location"].longitude == loc.longitude
+  })[0]
+
+  return _.filter(nearBy["nearBy"], function(b){
+    return _.includes(b["categories"].join(','), "Hospitals")
+  }).length > 1
 }
 
-function has_some_feature_4(loc){
-  // TODO
-  return false
+function Does_the_location_with_any_cinemas_nearby_in_2000_km(loc){
+  var nearBy=_.filter(nearbyBusinesses, function(b){
+    //console.log("latitude: ", b["location"].latitude)
+    return b["location"].latitude == loc.latitude && b["location"].longitude == loc.longitude
+  })[0]
+  return _.filter(nearBy["nearBy"], function(b){
+    return _.includes(b["categories"].join(','), "Cinema")
+  }).length > 0
 }
 
-function has_some_feature_5(loc){
-  // TODO
-  return false
+function Does_the_location_with_any_Starbucks_nearby_in_2000_km(loc){
+  var nearBy=_.filter(nearbyBusinesses, function(b){
+    //console.log("latitude: ", b["location"].latitude)
+    return b["location"].latitude == loc.latitude && b["location"].longitude == loc.longitude
+  })[0]
+  return _.filter(nearBy["nearBy"], function(b){
+    return b["name"] == "Starbucks"
+  }).length > 0
 }
 
 //
@@ -154,9 +185,10 @@ function visualize_true_or_false(domElement, locs, scores){
 }
 
 var items = []
+var nearbyBusinesses=[]
 function loadDataThenRunSolutions(){
 
-  var locs = getCandidateLocations()
+  var locs = getCandidateLocations(2, 3)
   visualize($('#candidates .map')[0], locs)
 
   $.get({url: 'http://bigdatahci2015.github.io/data/yelp/yelp_academic_dataset_business.phoenix.json.lines.txt'})
@@ -165,21 +197,32 @@ function loadDataThenRunSolutions(){
 
       // convert text lines to json arrays and save them in `items`
       items = _.map(lines, JSON.parse)
+      nearbyBusinesses = _.map(locs, function(loc){
+        return {
+          "location": loc,
+          "nearBy": _.filter(items, function(item) {
+            var loc2  = _.pick(item, ['latitude', 'longitude'])
+            return geolib.getDistance(loc, loc2) <= 2000
+          })
+        }
+          
+      })
+
 
       // take only the last 2000 to speed up computation
       // TODO: comment this out before the final submission
-      items = _.takeRight(items, 2000)
+      //items = _.takeRight(items, 2000)
 
       console.log('number of items loaded:', items.length)
       console.log('first item:', items[0])
 
       console.log('scoring all candidate locations')
 
-      scoreAndVisualize(locs, has_some_feature_1, visualize_true_or_false)
-      scoreAndVisualize(locs, has_some_feature_2, visualize_true_or_false)
-      scoreAndVisualize(locs, has_some_feature_3, visualize_true_or_false)
-      scoreAndVisualize(locs, has_some_feature_4, visualize_true_or_false)
-      scoreAndVisualize(locs, has_some_feature_5, visualize_true_or_false)
+      scoreAndVisualize(locs, Does_the_location_without_any_gyms_nearby_in_2000_km, visualize_true_or_false)
+      scoreAndVisualize(locs, Does_the_location_with_any_McDonalds_nearby_in_2000_km, visualize_true_or_false)
+      scoreAndVisualize(locs, Does_the_location_with_more_than_1_hospital_nearby_in_2000_km, visualize_true_or_false)
+      scoreAndVisualize(locs, Does_the_location_with_any_cinemas_nearby_in_2000_km, visualize_true_or_false)
+      scoreAndVisualize(locs, Does_the_location_with_any_Starbucks_nearby_in_2000_km, visualize_true_or_false)
 
    })
    .fail(function(err){
