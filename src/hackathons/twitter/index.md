@@ -94,12 +94,11 @@ correctly, and also what other teams are up to in real-time.
 
 The team members who contributed to this hackathon are:
 
-- (Name)
-- (Name)
-- (Name)
-- (Name)
-- (Name)
-- (Name)
+- Zhili Yang
+- Caleb Hsu
+- Andrew Linenfelser
+- Andrey Shprengel
+- Andrew Berumen
 
 ## Grading
 
@@ -109,9 +108,9 @@ Each person must implement at least ONE detector function. It must be meaningful
 
 Our team came up with the following interesting events:
 
-1. Has observed .... ? contributed by (Name)
+1. Has observed the tweet about "world cup" ? contributed by (Zhili Yang)
 
-  (one sentence justification why this event is interesting)
+  It's interesting because Russia would raise next World cup in 2018.
 
 1. Has observed .... ? contributed by (Name)
 
