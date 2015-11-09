@@ -121,16 +121,16 @@ function analyze(events){
 
   ask(how_many_individuals_analyzed_so_far, events)
   ask(whose_data_is_available, events)
-  ask(question1, events)
-  ask(question2, events)
-  ask(question3, events)
-  ask(question4, events)
-  ask(question5, events)
-  ask(question6, events)
-  ask(question7, events)
-  ask(question8, events)
-  ask(question9, events)
-  ask(question10, events)
+  ask(how_many_people_used_correct_path, events)
+  ask(in_the_group_above_how_many_people_used_Date_date_or_neither_of_them_as_their_path_names, events)
+  ask(how_many_emails_we_got_yesterday_in_the_group_of_uppercase_Date, events)
+  ask(how_many_emails_we_got_yesterday_in_the_group_of_lowercase_Date, events)
+  ask(how_many_emails_we_got_today_in_the_group_of_uppercase_Date, events)
+  ask(how_many_emails_we_got_today_in_the_group_of_lowercase_Date, events)
+  ask(how_many_emails_we_got_on_Friday_in_the_group_of_uppercase_Date, events)
+  ask(how_many_emails_we_got_on_Friday_in_the_group_of_lowercase_Date, events)
+  ask(how_many_emails_have_the_uppercase_group_received_on_Friday_from_3pm_to_12am, events)
+  ask(how_many_emails_have_the_lowercase_group_received_on_Friday_from_3pm_to_12am, events)
 }
 
 function how_many_individuals_analyzed_so_far(events){
@@ -141,44 +141,411 @@ function whose_data_is_available(events){
   return _.keys(events).join(' , ')
 }
 
-function question1(events){
-  return '...'
+function how_many_people_used_correct_path(events){
+  console.log("jsons: ",events)
+  var pairs=_.pairs(events)
+  console.log("pairs: ", pairs)
+
+  return _.filter(pairs, function(p){
+    return p[1] != null && p[1]["gmail"] != null
+  }).length
+
 }
 
-function question2(events){
-  return '...'
+function in_the_group_above_how_many_people_used_Date_date_or_neither_of_them_as_their_path_names(events){
+  var pairs=_.pairs(events)
+
+  var filt=_.filter(pairs, function(p){
+    return p[1] != null && p[1]["gmail"] != null
+  })
+  var map_filt=_.map(filt, function(f){
+    return {
+      "name": f[0],
+      "emails": _.pairs(f[1]["gmail"])
+    }
+  })
+  console.log("map: ", map_filt)
+  var Dates=_.filter(map_filt, function(f){
+    return f["emails"].length != 0 && f["emails"][0][1]["Date"] != null
+  })
+  var dates=_.filter(map_filt, function(f){
+    return f["emails"].length != 0 && f["emails"][0][1]["date"] != null
+  })
+  var none=_.filter(map_filt, function(f){
+    return f["emails"].length != 0 && f["emails"][0][1]["date"] == null && f["emails"][0][1]["Date"] == null
+  })
+  console.log("dates: ", dates)
+  return 'Date: '+Dates.length+"; date: "+dates.length+"; none: "+none.length
 }
 
-function question3(events){
-  return '...'
+function how_many_emails_we_got_yesterday_in_the_group_of_uppercase_Date(events){
+  var pairs=_.pairs(events)
+
+  var filt=_.filter(pairs, function(p){
+    return p[1] != null && p[1]["gmail"] != null
+  })
+  var map_filt=_.map(filt, function(f){
+    return {
+      "name": f[0],
+      "emails": _.pairs(f[1]["gmail"])
+    }
+  })
+  
+  var Dates=_.filter(map_filt, function(f){
+    return f["emails"].length != 0 && f["emails"][0][1]["Date"] != null
+  })
+  console.log("Dates: ", Dates)
+
+  var date = new Date();
+  var month = [];
+  month[0] = "Jan";
+  month[1] = "Feb";
+  month[2] = "Mar";
+  month[3] = "Apr";
+  month[4] = "May";
+  month[5] = "Jun";
+  month[6] = "Jul";
+  month[7] = "Aug";
+  month[8] = "Sep";
+  month[9] = "Oct";
+  month[10] = "Nov";
+  month[11] = "Dec";
+  date.setDate(date.getDate() - 1);
+  console.log("date: ", date)
+  
+  var str_date=date.getDate()+" "+month[date.getMonth()]
+  console.log("date: ", str_date)
+
+  var map_Dates=_.map(Dates, function(d){
+    return {
+      "num_email": _.filter(d["emails"], function(e){
+        return e[1]["Date"] != null && (e[1]["Date"].split(" ")[1]+" "+e[1]["Date"].split(" ")[2]) === str_date
+      }).length,
+      "name": d["name"]
+    }
+  })
+  console.log("map_num: ", map_Dates)
+  
+  return _.sum(map_Dates, function(m){
+    return m["num_email"]
+  })
 }
 
-function question4(events){
-  return '...'
+function how_many_emails_we_got_yesterday_in_the_group_of_lowercase_Date(events){
+    var pairs=_.pairs(events)
+
+  var filt=_.filter(pairs, function(p){
+    return p[1] != null && p[1]["gmail"] != null
+  })
+  var map_filt=_.map(filt, function(f){
+    return {
+      "name": f[0],
+      "emails": _.pairs(f[1]["gmail"])
+    }
+  })
+  
+  var dates=_.filter(map_filt, function(f){
+    return f["emails"].length != 0 && f["emails"][0][1]["date"] != null
+  })
+  console.log("dates: ", dates)
+
+  var date = new Date();
+  var month = [];
+  month[0] = "Jan";
+  month[1] = "Feb";
+  month[2] = "Mar";
+  month[3] = "Apr";
+  month[4] = "May";
+  month[5] = "Jun";
+  month[6] = "Jul";
+  month[7] = "Aug";
+  month[8] = "Sep";
+  month[9] = "Oct";
+  month[10] = "Nov";
+  month[11] = "Dec";
+  date.setDate(date.getDate() - 1);
+  console.log("date: ", date)
+  
+  var str_date=date.getDate()+" "+month[date.getMonth()]
+  console.log("date: ", str_date)
+
+  var map_dates=_.map(dates, function(d){
+    return {
+      "num_email": _.filter(d["emails"], function(e){
+        return e[1]["date"] != null && (e[1]["date"].split(" ")[1]+" "+e[1]["date"].split(" ")[2]) === str_date
+      }).length,
+      "name": d["name"]
+    }
+  })
+  console.log("map_num: ", map_dates)
+
+  return _.sum(map_dates, function(m){
+    return m["num_email"]
+  })
 }
 
-function question5(events){
-  return '...'
+function how_many_emails_we_got_today_in_the_group_of_uppercase_Date(events){
+    var pairs=_.pairs(events)
+
+  var filt=_.filter(pairs, function(p){
+    return p[1] != null && p[1]["gmail"] != null
+  })
+  var map_filt=_.map(filt, function(f){
+    return {
+      "name": f[0],
+      "emails": _.pairs(f[1]["gmail"])
+    }
+  })
+  
+  var Dates=_.filter(map_filt, function(f){
+    return f["emails"].length != 0 && f["emails"][0][1]["Date"] != null
+  })
+  console.log("Dates: ", Dates)
+
+  var date = new Date();
+  var month = [];
+  month[0] = "Jan";
+  month[1] = "Feb";
+  month[2] = "Mar";
+  month[3] = "Apr";
+  month[4] = "May";
+  month[5] = "Jun";
+  month[6] = "Jul";
+  month[7] = "Aug";
+  month[8] = "Sep";
+  month[9] = "Oct";
+  month[10] = "Nov";
+  month[11] = "Dec";
+  console.log("date: ", date)
+  
+  var str_date=date.getDate()+" "+month[date.getMonth()]
+  console.log("date: ", str_date)
+
+  var map_Dates=_.map(Dates, function(d){
+    return {
+      "num_email": _.filter(d["emails"], function(e){
+        return e[1]["Date"] != null && (e[1]["Date"].split(" ")[1]+" "+e[1]["Date"].split(" ")[2]) === str_date
+      }).length,
+      "name": d["name"]
+    }
+  })
+  console.log("map_num: ", map_Dates)
+  
+  return _.sum(map_Dates, function(m){
+    return m["num_email"]
+  })
 }
 
-function question6(events){
-  return '...'
+function how_many_emails_we_got_today_in_the_group_of_lowercase_Date(events){
+  var pairs=_.pairs(events)
+
+  var filt=_.filter(pairs, function(p){
+    return p[1] != null && p[1]["gmail"] != null
+  })
+  var map_filt=_.map(filt, function(f){
+    return {
+      "name": f[0],
+      "emails": _.pairs(f[1]["gmail"])
+    }
+  })
+  
+  var dates=_.filter(map_filt, function(f){
+    return f["emails"].length != 0 && f["emails"][0][1]["date"] != null
+  })
+  console.log("dates: ", dates)
+
+  var date = new Date();
+  var month = [];
+  month[0] = "Jan";
+  month[1] = "Feb";
+  month[2] = "Mar";
+  month[3] = "Apr";
+  month[4] = "May";
+  month[5] = "Jun";
+  month[6] = "Jul";
+  month[7] = "Aug";
+  month[8] = "Sep";
+  month[9] = "Oct";
+  month[10] = "Nov";
+  month[11] = "Dec";
+  console.log("date: ", date)
+  
+  var str_date=date.getDate()+" "+month[date.getMonth()]
+  console.log("date: ", str_date)
+
+  var map_dates=_.map(dates, function(d){
+    return {
+      "num_email": _.filter(d["emails"], function(e){
+        return e[1]["date"] != null && (e[1]["date"].split(" ")[1]+" "+e[1]["date"].split(" ")[2]) === str_date
+      }).length,
+      "name": d["name"]
+    }
+  })
+  console.log("map_num: ", map_dates)
+
+  return _.sum(map_dates, function(m){
+    return m["num_email"]
+  })
 }
 
-function question7(events){
-  return '...'
+function how_many_emails_we_got_on_Friday_in_the_group_of_uppercase_Date(events){
+  var pairs=_.pairs(events)
+
+  var filt=_.filter(pairs, function(p){
+    return p[1] != null && p[1]["gmail"] != null
+  })
+  var map_filt=_.map(filt, function(f){
+    return {
+      "name": f[0],
+      "emails": _.pairs(f[1]["gmail"])
+    }
+  })
+  
+  var Dates=_.filter(map_filt, function(f){
+    return f["emails"].length != 0 && f["emails"][0][1]["Date"] != null
+  })
+  console.log("Dates: ", Dates)
+  var map_Fri=_.map(Dates, function(d){
+    return {
+      "num_email": _.filter(d["emails"], function(e){
+        return e[1]["Date"] != null && e[1]["Date"].split(" ")[0] === "Fri,"
+      }).length,
+      "name": d["name"]
+    }
+  })
+  console.log("Fridays: ", map_Fri)
+  return _.sum(map_Fri, function(m){
+    return m["num_email"]
+  })
 }
 
-function question8(events){
-  return '...'
+function how_many_emails_we_got_on_Friday_in_the_group_of_lowercase_Date(events){
+  var pairs=_.pairs(events)
+
+  var filt=_.filter(pairs, function(p){
+    return p[1] != null && p[1]["gmail"] != null
+  })
+  var map_filt=_.map(filt, function(f){
+    return {
+      "name": f[0],
+      "emails": _.pairs(f[1]["gmail"])
+    }
+  })
+  
+  var dates=_.filter(map_filt, function(f){
+    return f["emails"].length != 0 && f["emails"][0][1]["date"] != null
+  })
+  console.log("dates: ", dates)
+  var map_Fri=_.map(dates, function(d){
+    return {
+      "num_email": _.filter(d["emails"], function(e){
+        return e[1]["date"] != null && e[1]["date"].split(" ")[0] === "Fri,"
+      }).length,
+      "name": d["name"]
+    }
+  })
+  console.log("Fridays: ", map_Fri)
+  return _.sum(map_Fri, function(m){
+    return m["num_email"]
+  })
 }
 
-function question9(events){
-  return '...'
+function how_many_emails_have_the_uppercase_group_received_on_Friday_from_3pm_to_12am(events){
+    var pairs=_.pairs(events)
+
+  var filt=_.filter(pairs, function(p){
+    return p[1] != null && p[1]["gmail"] != null
+  })
+  var map_filt=_.map(filt, function(f){
+    return {
+      "name": f[0],
+      "emails": _.pairs(f[1]["gmail"])
+    }
+  })
+  
+  var Dates=_.filter(map_filt, function(f){
+    return f["emails"].length != 0 && f["emails"][0][1]["Date"] != null
+  })
+  console.log("Dates: ", Dates)
+  var map_Fri=_.map(Dates, function(d){
+    return {
+      "emails": _.filter(d["emails"], function(e){
+        return e[1]["Date"] != null && e[1]["Date"].split(" ")[0] === "Fri,"
+      }),
+      "name": d["name"]
+    }
+  })
+  console.log("map Fridays: ", map_Fri)
+  var map_time=_.map(map_Fri, function(d){
+    return {
+      "hours": _.map(d["emails"], function(e){
+        return parseInt(e[1]["Date"].split(" ")[4].split(":")[0])
+      }),
+      "name": d["name"]
+    }
+  })
+  console.log("times: ", map_time)
+  var num_emails=_.map(map_time, function(m){
+    return {
+      "num_email": _.filter(m["hours"], function(e){
+        return 15 <= e & 24 > e
+      }).length,
+      "name": m["name"]
+    }
+  })
+  console.log("num emails: ", num_emails)
+  return _.sum(num_emails, function(m){
+    return m["num_email"]
+  })
 }
 
-function question10(events){
-  return '...'
+function how_many_emails_have_the_lowercase_group_received_on_Friday_from_3pm_to_12am(events){
+  var pairs=_.pairs(events)
+
+  var filt=_.filter(pairs, function(p){
+    return p[1] != null && p[1]["gmail"] != null
+  })
+  var map_filt=_.map(filt, function(f){
+    return {
+      "name": f[0],
+      "emails": _.pairs(f[1]["gmail"])
+    }
+  })
+  
+  var dates=_.filter(map_filt, function(f){
+    return f["emails"].length != 0 && f["emails"][0][1]["date"] != null
+  })
+  console.log("dates: ", dates)
+  var map_Fri=_.map(dates, function(d){
+    return {
+      "emails": _.filter(d["emails"], function(e){
+        return e[1]["date"] != null && e[1]["date"].split(" ")[0] === "Fri,"
+      }),
+      "name": d["name"]
+    }
+  })
+  console.log("Fridays: ", map_Fri)
+  var map_time=_.map(map_Fri, function(d){
+    return {
+      "hours": _.map(d["emails"], function(e){
+        return parseInt(e[1]["date"].split(" ")[4].split(":")[0])
+      }),
+      "name": d["name"]
+    }
+  })
+  console.log("times: ", map_time)
+  var num_emails=_.map(map_time, function(m){
+    return {
+      "num_email": _.filter(m["hours"], function(e){
+        return 15 <= e & 24 > e
+      }).length,
+      "name": m["name"]
+    }
+  })
+  console.log("num emails: ", num_emails)
+  return _.sum(num_emails, function(m){
+    return m["num_email"]
+  })
 }
 
 
