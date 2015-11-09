@@ -110,6 +110,9 @@ function how_many_emails_have_i_received_since(events){
 
 function how_many_emails_have_i_received_on_Nov_6(events){
   var pairs=_.pairs(events.gmail)
+  pairs=_.filter(pairs, function(p){
+    return p[1]["Date"] != null
+  })
   var dates=_.map(pairs, function(p){
     return p[1]["Date"].split(" ")[1]+" "+p[1]["Date"].split(" ")[2]
   })
@@ -121,6 +124,9 @@ function how_many_emails_have_i_received_on_Nov_6(events){
 
 function how_many_emails_have_i_received_on_Friday(events){
   var pairs=_.pairs(events.gmail)
+  pairs=_.filter(pairs, function(p){
+    return p[1]["Date"] != null
+  })
   var dates=_.map(pairs, function(p){
     return p[1]["Date"].split(" ")[0]
   })
@@ -152,6 +158,9 @@ function how_many_emails_have_i_received_yesterday(events){
   console.log("date: ", str_date)
 
   var pairs=_.pairs(events.gmail)
+  var pairs=_.filter(pairs, function(p){
+    return p[1]["Date"] != null
+  })
   var dates=_.map(pairs, function(p){
     return p[1]["Date"].split(" ")[1]+" "+p[1]["Date"].split(" ")[2]
   })
@@ -183,6 +192,9 @@ function how_many_emails_have_i_received_today(events){
   console.log("date: ", str_date)
 
   var pairs=_.pairs(events.gmail)
+  pairs=_.filter(pairs, function(p){
+    return p[1]["Date"] != null
+  })
   var dates=_.map(pairs, function(p){
     return p[1]["Date"].split(" ")[1]+" "+p[1]["Date"].split(" ")[2]
   })
@@ -213,6 +225,9 @@ function how_many_emails_have_i_received_today_from_3pm_to_12am(events){
   console.log("date: ", str_date)
 
   var pairs=_.pairs(events.gmail)
+  pairs=_.filter(pairs, function(p){
+    return p[1]["Date"] != null
+  })
   var dates=_.map(pairs, function(p){
     return {
       "date": p[1]["Date"].split(" ")[1]+" "+p[1]["Date"].split(" ")[2],
@@ -248,6 +263,9 @@ function how_many_emails_have_i_received_last_month(events){
   console.log("date: ", str_month)
 
   var pairs=_.pairs(events.gmail)
+  pairs=_.filter(pairs, function(p){
+    return p[1]["Date"] != null
+  })
   var dates=_.map(pairs, function(p){
     return p[1]["Date"].split(" ")[2]
   })
@@ -278,6 +296,9 @@ function how_many_emails_have_i_received_this_month(events){
   console.log("date: ", str_month)
 
   var pairs=_.pairs(events.gmail)
+  pairs=_.filter(pairs, function(p){
+    return p[1]["Date"] != null
+  })
   var dates=_.map(pairs, function(p){
     return p[1]["Date"].split(" ")[2]
   })
@@ -292,6 +313,9 @@ function how_many_emails_have_i_received_this_year(events){
   var date = new Date();
   console.log("year: ", date.getFullYear())
   var pairs=_.pairs(events.gmail)
+  pairs=_.filter(pairs, function(p){
+    return p[1]["Date"] != null
+  })
   var years=_.map(pairs, function(p){
     return p[1]["Date"].split(" ")[3]
   })
@@ -328,6 +352,9 @@ function how_many_emails_have_i_received_in_past_two_days(events){
  
 
   var pairs=_.pairs(events.gmail)
+  pairs=_.filter(pairs, function(p){
+    return p[1]["Date"] != null
+  })
   var dates=_.map(pairs, function(p){
     return p[1]["Date"].split(" ")[1]+" "+p[1]["Date"].split(" ")[2]
   })
@@ -369,6 +396,9 @@ function how_many_emails_have_i_received_in_past_one_hour(events){
   console.log("hours:", date.getHours())
 
   var pairs=_.pairs(events.gmail)
+  pairs=_.filter(pairs, function(p){
+    return p[1]["Date"] != null
+  })
   var dates=_.map(pairs, function(p){
     return {
       "date": p[1]["Date"].split(" ")[1]+" "+p[1]["Date"].split(" ")[2],
@@ -384,7 +414,6 @@ function how_many_emails_have_i_received_in_past_one_hour(events){
     else if(d["date"] === str_date && current_hours == d["hours"]){
       return d["mins"] <= current_mins
     }
-    false
   })
   return today_emails.length
 }
