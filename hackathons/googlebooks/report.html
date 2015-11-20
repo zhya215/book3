@@ -1,0 +1,306 @@
+<html>
+<head>
+  <title>Google Book Words</title>
+    <style>
+        .answer {
+            min-height: 50px
+        }
+        section{
+          padding: 10px;
+          margin-bottom: 12px
+        }
+        #title {
+          position: absolute;
+          padding: 20px;
+          font-size: 64px;
+          font-weight: bolder;
+          color: white;
+          top: 50px;
+          left: 0px;
+          text-shadow: -2px 0 black, 0 2px black, 5px 0 black, 0 -2px black
+        }
+        #title .authors {
+          padding: 20px;
+          font-size: 32px;
+          font-weight: bolder;
+          color: #DDD;
+          text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black
+        }
+        #tweets {
+          min-height: 300px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.1/css/materialize.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.9.1/styles/tomorrow.min.css">
+</head>
+<body>
+
+  <div class="parallax-container"  style="height:300px">
+    <div class="parallax">
+      <img src="http://res.cloudinary.com/craftml/image/upload/c_scale,e_brightness:-62,w_1000/v1447038536/books_nh4k05.jpg">
+      <h1 id="title">How did word usage change over time?
+        <div class="authors">by [Name 1], [Name 2], [Name 3], [Name 4]</div>
+      </h1>
+    </div>
+  </div>
+
+  <div class="section white container flow-text">
+      <div class="switch">
+        Source Code
+        <label>
+          <input type="checkbox">
+          <span class="lever"></span>
+        </label>
+      </div>
+
+      <div id="questions" class="col s10 collection">
+      </div>
+  </div>
+
+  <script src="https://cdn.firebase.com/js/client/2.3.1/firebase.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.10.1/lodash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.1/js/materialize.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.5/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.9.1/highlight.min.js"></script>
+  <script>
+
+function toggleSourecode(){
+  $('pre').each(function(){
+    if ($(this).height()){
+        $(this).attr('data-height', $(this).height())
+        $(this).height(0)
+    } else {
+      $(this).height($(this).attr('data-height'))
+    }
+  })
+}
+$('.switch input').click(toggleSourecode)
+
+function csv2jsonArray(rawdata){
+  console.log('converting csv to json array')
+  var lines = rawdata.trim().split('\n')
+  var rows = _.rest(lines)
+  return _.map(rows, function(row){
+    var toks = row.split(',')
+    return {decade: toks[0], word: toks[1], rank: toks[2], count: toks[3]}
+    // TODO:
+    // return {decade:1900, word: 'the', count: 721149566}
+  })
+}
+
+var items
+$.ajax({url: 'https://big-data-hci-hackathon.firebaseapp.com/data/ngrams_10000.csv'})
+ .done(function(rawdata){
+
+  items = csv2jsonArray(rawdata)
+  console.log('number of items loaded:', items.length)
+  console.log('first item:', items[0])
+
+  analyze()
+
+ })
+ .fail(function(err){
+     console.error(err)
+ })
+
+function ask(text, func){
+  var answer = func(items)
+
+  // html element to display the answer
+  var answerHtml = '<div class="collection-item answer">' +
+      '<h4>' + text + '</h4>' +
+      '<div>' + answer + '</div>' +
+      '<pre><code>' + func.toString() + '</code></pre>' +
+    '</div>'
+
+  // append to #quetions
+  $('#questions').append(answerHtml)
+}
+
+function analyze(){
+  ask('For each decade, what is the most popular, longest word?', func1)
+  ask('For each decade, what is the least popular, longest word?', func2)
+  ask('In which decade coffee is more popular than tea?', func3)
+  ask('What word with the longest char that constantly appear since 1660?', func4)
+ask('What are the least popular words that has been used at least 30000 times?', func5)
+
+  $('pre code').each(function(i, block) {
+    hljs.highlightBlock(block);
+  })
+  toggleSourecode()
+}
+
+// For each decade, what is the most popular, longest word?
+function func1(){
+  return _.chain(items)
+    .groupBy('decade')
+    .mapValues(function(d) {
+      longestWords = _.chain(d)
+        .groupBy(function(w) { return w.word.length })
+        .pairs()
+        .last()
+        .value()
+      mostPopular = _.min(longestWords[1], function(w) {
+        return w.rank
+      })
+      return ' ' + mostPopular.word + '(rank ' + mostPopular.rank +')'
+    }).pairs()
+    .value().join('; ')
+}
+
+
+// For each decade, what is the least popular, longest word?
+function func2(){
+  return _.chain(items)
+    .groupBy('decade')
+    .mapValues(function(d) {
+      longestWords = _.chain(d)
+        .groupBy(function(w) { return w.word.length })
+        .pairs()
+        .last()
+        .value()
+      leastPopular = _.max(longestWords[1], function(w) {
+        return w.rank
+      })
+      return ' ' + leastPopular.word + '(rank ' + leastPopular.rank +')'
+    }).pairs()
+    .value().join('; ')
+}
+
+
+
+function func3(){
+  var tea_coffee=_.filter(items, function(i){
+    return i["word"] === "tea" || i["word"] === "coffee"
+  })
+  var decade_group=_.groupBy(tea_coffee, function(i){
+    return i["decade"]
+  })
+  
+  var groups=_.mapValues(decade_group, function(g){
+    return _.pairs(_.groupBy(g, function(e){
+      return e["word"]
+    }))
+  })
+
+  var clean_groups=_.mapValues(groups, function(g){
+    return _.map(g, function(e){
+      return {
+        word: e[0],
+        decade: e[1][0]["decade"],
+        rank: e[1][0]["rank"]
+      }
+    })
+  })
+
+  var pairs=_.map(_.pairs(clean_groups), function(p){
+    return {
+      decade: p[0],
+      tea_coffee: p[1]
+    }
+  })
+
+  var filt_pairs=_.filter(pairs, function(p){
+    return p["tea_coffee"].length > 1
+  })
+
+  var group_filt=_.map(filt_pairs, function(f){
+    return {
+      decade: f["decade"],
+      tea_coffee: _.groupBy(f["tea_coffee"], function(t){
+        return t["word"]
+      })
+    }
+  })
+
+  var diff=_.map(group_filt, function(g){
+    return {
+      decade: g["decade"],
+      diff: parseInt(g["tea_coffee"]["coffee"][0]["rank"])-parseInt(g["tea_coffee"]["tea"][0]["rank"])
+    }
+  })
+
+  var diff_filt=_.filter(diff, function(d){
+    return d["diff"] < 0
+  })
+
+
+
+
+
+  return diff_filt[0]["decade"]
+}
+
+function func4(){
+  // words that only appear in 1600-1650
+  var gr = _.groupBy(items,function(n){
+    return n.word 
+  })
+  console.log("group word",gr)
+
+  var leng = _.filter(gr,function(n){
+    return n.length == 35
+  })
+  //console.log("leng",leng)
+  var m = _.map(leng,function(n){
+    return n[0].word.length
+  })
+
+  var maxim = _.max(m)
+  var wor = _.filter(leng,function(n){
+    return n[0].word.length == maxim
+  })
+  var result = _.map(wor,function(n){
+    return n[0].word
+  })
+
+  console.log("wor",result)
+  return result
+ 
+  //var decades = ["1600","1610","1620","1630","1640","1650",
+  //"1660","1670","1680","1690","1700","1710","1720","1730","1740","1750","1760","1770","1780","1790","1800"]
+
+ 
+  /*var r = _.filter(m,function(n){
+    return n.decade == '1600' && n.decade == '1610'
+  })*/
+
+
+  //console.log("thr: ",r)
+
+  //console.log("The first 20: ",num)
+
+}
+
+function func5(){
+  var group = _.groupBy(items,function(n){
+    return n.decade
+  })
+
+  var leastPopular = _.map(group,function(n){
+    return n[0]
+  })
+
+  var result = _.filter(leastPopular,function(n){
+    return n.count > 30000
+  })
+
+  var map = _.map(result,function(n){
+    return n.decade + ": " + n.word + "(" +n.count + ")"
+  })
+
+  console.log(result)
+  return map
+}
+
+// initialize the parallax effect
+$(document).ready(function(){
+    $('.parallax').parallax()
+})
+
+    </script>
+
+</body>
+</html>
