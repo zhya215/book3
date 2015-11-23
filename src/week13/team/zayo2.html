@@ -215,9 +215,9 @@ function tsv2jsonDetails(rawdata){
 
   var rows = _.rest(lines)
 
-  var row2 = _.drop(rows,1)
+ // var row2 = _.drop(rows,1)
 
-  return _.map(row2, function(row){
+  return _.map(rows, function(row){
 
     var toks = row.split('\t')
 
@@ -235,9 +235,9 @@ function csv2jsonService(rawdata){
 
   var rows = _.rest(lines)
 
-  console.log("rows: ", _.drop(rows, 1))
+  console.log("rows: ", rows)
 
-  rows=_.drop(rows, 1)
+ // rows=_.drop(rows, 1)
 
   return _.map(rows, function(row){
 
@@ -288,6 +288,7 @@ function loadDataThenRunSolutions() {
         .done(function(data){
 
           servicesItems = csv2jsonService(data)
+          console.log("servicesItems: ", servicesItems)
           $.get('/data/Tranzact_Accounts_CustomerAccouts_NoServices.tsv')
 
             .done(function(data){

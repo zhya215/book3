@@ -6,7 +6,7 @@ layout: layout.hbs
 
 # Team
 
-- [zayo2.html](team/zayo2.html)
+- [zayo.html](team/zayo.html)
 
 # Individual
 
