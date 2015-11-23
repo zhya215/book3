@@ -347,9 +347,75 @@ function func4() {
 
 // Of the Tranzact accounts without services: How would you prioritize which accounts to
 // go after first and which products would they potentially buy?
+// Of the Tranzact accounts without services: How would you prioritize which accounts to
+// go after first and which products would they potentially buy?
+// Customers with the highest Sales Volumes from the top three industry/sector pairs,
+// ranked by average MRR are selected.  To these potential customers, we recommend products
+// that are used by current customers in the top-ranking industry/sector pairs.
 function func5() {
 
-  return 'NIY'
+  // mrrs = [customer_id, total_mrr]
+  var mrrs = _.chain(servicesItems)
+    .groupBy( 'Name/ID')
+    .mapValues(function(d) {
+      return _.sum(d, function(item) {
+        return parseFloat(item["Total MRR"].replace(/[^0-9.-]+/g, ''))
+      })
+    }).value()
+
+  // products = [customer_id, product_list]
+  var products = _.chain(servicesItems)
+    .groupBy('Name/ID')
+    .mapValues(function(d) {
+      return _.uniq(_.pluck(d, 'Product'))
+    })
+    .value()
+
+  // industryVerticals = [industry_vertical_pair, avg_MRR, product_list]
+  industryVerticals = _.chain(servicesItems)
+    .map(function(d) {
+      var detailItem = _.find(detailItems, {'Name/ID': d['Name/ID']})
+      if(detailItem) return [d['Name/ID'], detailItem.Industry, detailItem.Vertical]
+      else return [d['Name/Id'], null, null]
+    })
+    .filter(function(d) { return d[1] != null })  // some customers have no entry in detailItems
+    .groupBy(function(d) { return [d[1], d[2]] })
+    .mapValues(function(d) {
+      var avgMrr = _.sum(d, function(customer) { return mrrs[customer[0]] })
+      var productList = []
+      _.forEach(d, function(customer) {
+        productList = productList.concat(products[customer[0]])
+      })
+      return [avgMrr, _.uniq(productList)]
+    })
+    .pairs()
+    .sortBy(function(d) { return -d[1][0] })  // sort by MRR
+    .value()
+
+  var top3 = _.slice(industryVerticals, 0, 3) // top 3 industry/sector pairs by avg MRR
+  console.log('top3', top3)
+
+  newCustomers = _.chain(nonServicesItems)
+    .filter(function(d) {  // only consider customers from top3 industry/sector pairs
+      return _.includes([top3[0][0], top3[1][0], top3[2][0]], d.Industry + ',' + d.Vertical)
+    })
+    .groupBy(function(d) { return [d.Industry, d.Vertical] })
+    .mapValues(function(d) {
+      return _.chain(d)
+        .sortBy(function(item) { return -item.PriorYearRevenue.replace(/[^0-9.-]+/g, '') })
+        .slice(0,10)
+        .map(function(d) { return [d['Name/ID'], d['PriorYearRevenue']] })
+        .value().join('  ||  ')
+    })
+    .pairs()
+    .value()
+
+  return '(' + newCustomers[0][0] + '): ' + newCustomers[0][1] +
+    '(' + newCustomers[1][0] + '): ' + newCustomers[1][1] +
+    '(' + newCustomers[2][0] + '): ' + newCustomers[2][1] +
+    '(' + top3[0][0] + '): ' + top3[0][1][1].join(', ') +
+    '(' + top3[1][0] + '): ' + top3[1][1][1].join(', ') +
+    '(' + top3[2][0] + '): ' + top3[2][1][1].join(', ')
 }
 
 // initialize the parallax effect
