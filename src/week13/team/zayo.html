@@ -205,7 +205,62 @@ function func2() {
 
 // If Zayo only had 5 representatives, which states would you prioritize for in­ person meetings?
 function func3() {
-  return 'NIY'
+  /*
+  console.log("service items: ",servicesItems)
+  var fil = _.filter(servicesItems,function(n){
+    return n["Service Status"] == "Active"
+  })
+  var active = _.groupBy(fil,function(n){
+    return n["Product"]
+  })*/
+  
+  /* Code to see how many customer in each states
+  var state = _.groupBy(servicesItems,function(n){
+    return n["State A"]
+  })
+
+  var customer = _.mapValues(state,function(n){
+    return _.uniq(_.map(n,function(d){
+      return d["Name/ID"]
+    }))
+  })*/
+
+  
+  var customerFil = _.map(servicesItems,function(n){
+    return {"customer":n["Name/ID"],"state":n["State A"],"status":n["Service Status"],"total_MRR": parseFloat(n["Total MRR"].replace(/[^0-9.-]+/g, ''))}
+  })
+
+  // group By customer
+  var cust = _.groupBy(customerFil,function(n){
+    return n.customer
+  })
+
+  var mapTotalMRR = _.mapValues(cust,function(n){
+      return _.sum(_.map(n,function(d){
+        return d["total_MRR"]
+      }))
+  })
+
+  var mtr = _.map(mapTotalMRR,function(n,k){
+    return {"customer":k,"totalMRR":n}
+  })
+
+  var sortCustomer = _.sortBy(mtr,'totalMRR').reverse()
+
+  var state = _.filter(customerFil,function(n){
+    return (n.customer == sortCustomer[0].customer) 
+  })
+
+  var s = _.map(state,function(n){
+    return n.state
+  })
+
+  //console.log("cust :",customerFil)
+  //console.log("customer: ",s)
+ 
+
+  return "( state: " + _.uniq(s) + "; Account: "+ sortCustomer[0].customer +": " + sortCustomer[0].totalMRR + ")"
+  //console.log("state A: ",active)
 }
 
 // If Zayo sent quotes to all Tranzact accounts, how would you prioritize the customer
