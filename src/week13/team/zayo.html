@@ -266,82 +266,86 @@ function func3() {
 // If Zayo sent quotes to all Tranzact accounts, how would you prioritize the customer
 // account list? (And list the prioritized accounts from 1 to ####).
 function func4() {
-  function groupFunc(list){
-    var groups=_.groupBy(list, function(l){
-      return l["Name/ID"]
-    })
 
-    return _.mapValues(groups, function(g){
-      return _.sum(g, function(m){
-        var mrr=m["Total MRR"].replace("$", "")
+
+  function filt_func(status){
+    var with_status=[]
+    var without_status=_.filter(name_groups_pairs, function(n){
+      var length=_.filter(n[1], function(e){
+        return e["Service Status"] === status
+      })
+      if(length != 0){
+        var name={
+          name: n[0],
+          services: n[1]
+        }
+        with_status.push(name)
+        return false
+      }
+      else
+        return true
+    })
+    name_groups_pairs=without_status
+    console.log("with: ", with_status)
+    var sum_mrr=_.map(with_status, function(w){
+      var filt=_.filter(w.services, function(s){
+        return s["Service Status"] === status
+      })
+
+      var sum_m=_.sum(filt, function(f){
+        var mrr=f["Total MRR"].replace("$", "")
         mrr=mrr.replace(",", "")
         return parseFloat(mrr)
       })
+      return {
+        sum: sum_m,
+        name: w.name
+      }
     })
-    //return groups
+    console.log("sum: ", sum_mrr)
+
+    return _.sortBy(sum_mrr, function(s){
+      return s.sum
+    })
   }
 
-  function sortFunc(objects){
-    var pairs=_.pairs(objects)
-    return _.sortBy(pairs, function(p){
-      return p[1]
-    })
-  }
-  var status_groups=_.groupBy(servicesItems, function(s){
-    return s['Service Status']
+  var name_groups=_.groupBy(servicesItems, function(s){
+    return s['Name/ID']
   })
-  console.log("status: ",  _.keys(status_groups))
-  var filt_pend_change=_.filter(servicesItems, function(s){
-    return s['Service Status'] === "Pending Change"
-  })
-  var pend_change_groups=groupFunc(filt_pend_change)
-  var sort_pend_change= sortFunc(pend_change_groups)
-  console.log("pend change: ", sort_pend_change)
 
-  var filt_disc=_.filter(servicesItems, function(s){
-    return s['Service Status'] === "Disconnected"
-  })
-  var filt_disc_groups=groupFunc(filt_disc)
-  var sort_filt_disc=sortFunc(filt_disc_groups)
+  
 
-  var filt_pend_disc=_.filter(servicesItems, function(s){
-    return s['Service Status'] === "Pending Disconnect"
-  })
-  var filt_pend_disc_groups=groupFunc(filt_pend_disc)
-  var sort_pend_disc=sortFunc(filt_pend_disc_groups)
+  var name_groups_pairs=_.pairs(name_groups)
+  console.log("name groups, ", name_groups_pairs)
 
-  var filt_active=_.filter(servicesItems, function(s){
-    return s['Service Status'] === "Active"
-  })
-  var filt_active_groups=groupFunc(filt_active)
-  var sort_active=sortFunc(filt_active_groups)
+  var pend_change=filt_func("Pending Change")
+  
+  console.log("pend_change", pend_change)
 
-  var filt_bill=_.filter(servicesItems, function(s){
-    return s['Service Status'] === "Billed"
-  })
-  var filt_bill_groups=groupFunc(filt_bill)
-  var sort_bill=sortFunc(filt_bill_groups)
+  var disc=filt_func("Disconnected")
+  console.log("disc", disc)
 
-  var filt_partial_inst=_.filter(servicesItems, function(s){
-    return s['Service Status'] === "Partial Install"
-  })
-  var filt_partial_inst_groups=groupFunc(filt_partial_inst)
-  var sort_partial_inst=sortFunc(filt_partial_inst_groups)
+  var pend_disc=filt_func("Pending Disconnect")
+
+  var active=filt_func("Active")
+
+  var bill=filt_func("Billed")
+
+  var partial_install=filt_func("Partial Install")
 
   var sorts=[]
-  sorts=sorts.concat(sort_pend_change)
-  sorts=sorts.concat(sort_filt_disc)
-  sorts=sorts.concat(sort_pend_disc)
-  sorts=sorts.concat(sort_active)
-  sorts=sorts.concat(sort_bill)
-  sorts=sorts.concat(sort_partial_inst)
- // sorts=_.union(sorts)
-  console.log("sorts: ", sorts)
+  sorts=sorts.concat(pend_change)
+  sorts=sorts.concat(disc)
+  sorts=sorts.concat(pend_disc)
+  sorts=sorts.concat(active)
+  sorts=sorts.concat(bill)
+  sorts=sorts.concat(partial_install)
+
   var customers=_.map(sorts, function(s, i){
-    return {customer: s[0]+", priority: "+(i+1)}
+    return {customer: s.name+", priority: "+(i+1)}
   })
-  console.log("customers: ", customers)
-  //console.log("customers: ", _.pluck(customers, 'customer'))
+
+
   return _.pluck(customers, 'customer').join("; ")
 }
 
